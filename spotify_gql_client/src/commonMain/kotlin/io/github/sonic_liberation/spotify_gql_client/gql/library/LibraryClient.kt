@@ -48,7 +48,7 @@ class LibraryClient(client: HttpClientAPI) : SpotifyGQLBaseClient(client) {
             extensions = GQLRequestExtensions(
                 persistedQuery = PersistedQuery(
                     version = 1,
-                    sha256Hash = "0082bf82412db50128add72dbdb73e2961d59100b9cbf41fb25c568bd8bc358b",
+                    sha256Hash = "390c78e5b951029bad359785e69b07b536a509c581cbcd0aded5e5067f187455",
                 ),
             ),
         )
@@ -81,7 +81,7 @@ class LibraryClient(client: HttpClientAPI) : SpotifyGQLBaseClient(client) {
             extensions = GQLRequestExtensions(
                 persistedQuery = PersistedQuery(
                     version = 1,
-                    sha256Hash = "0082bf82412db50128add72dbdb73e2961d59100b9cbf41fb25c568bd8bc358b",
+                    sha256Hash = "390c78e5b951029bad359785e69b07b536a509c581cbcd0aded5e5067f187455",
                 ),
             ),
         )
@@ -113,7 +113,7 @@ class LibraryClient(client: HttpClientAPI) : SpotifyGQLBaseClient(client) {
             extensions = GQLRequestExtensions(
                 persistedQuery = PersistedQuery(
                     version = 1,
-                    sha256Hash = "973e511ca44261fda7eebac8b653155e7caee3675abb4fb110cc1b8c78b091c3",
+                    sha256Hash = "390c78e5b951029bad359785e69b07b536a509c581cbcd0aded5e5067f187455",
                 ),
             ),
         )

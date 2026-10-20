@@ -3,8 +3,8 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      nightly:
-        description: Nightly release (uses "nightly" tag)
+      continuous:
+        description: Continuous release (uses "continuous" tag)
         type: boolean
         default: false
 
@@ -51,7 +51,7 @@ jobs:
           ./gradlew :spotube_plugin_spotify:packageProductionPlugin
 
       - name: Read version from build.gradle.kts
-        if: ${{ !inputs.nightly }}
+        if: ${{ !inputs.continuous }}
         id: version
         run: |
           VERSION=$(sed -n '/spotubePlugin {/,/}/ { s/.*version = "\(.*\)"/\1/p }' spotube_plugin_spotify/build.gradle.kts | head -1)
@@ -60,8 +60,8 @@ jobs:
       - name: Set tag name
         id: tag
         run: |
-          if [ "${{ inputs.nightly }}" = "true" ]; then
-            echo "tag=nightly" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.continuous }}" = "true" ]; then
+            echo "tag=continuous" >> $GITHUB_OUTPUT
           else
             echo "tag=${{ steps.version.outputs.prop }}" >> $GITHUB_OUTPUT
           fi
@@ -73,6 +73,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          prerelease: ${{ inputs.nightly }}
+          prerelease: ${{ inputs.continuous }}
           files: plugin.smplug
           fail_on_unmatched_files: true

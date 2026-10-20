@@ -18,6 +18,7 @@
 package io.github.sonic_liberation.spotube_plugin_spotify.core
 
 import org.spotube.plugin_interfaces.plugin_apis.metadata.common.PaginationStrategy
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,6 +26,20 @@ data class ServerTimeResponse(val serverTime: Long)
 
 @Serializable
 data class NuanceInfo(val v: Int, val s: String)
+
+@Serializable
+data class GitHubReleaseAsset(
+    val name: String,
+    @SerialName("browser_download_url") val browserDownloadUrl: String
+)
+
+@Serializable
+data class GitHubRelease(
+    @SerialName("tag_name") val tagName: String,
+    @SerialName("html_url") val htmlUrl: String,
+    val body: String? = null,
+    val assets: List<GitHubReleaseAsset> = emptyList()
+)
 
 @Serializable
 data class NuanceFile(val content: String)

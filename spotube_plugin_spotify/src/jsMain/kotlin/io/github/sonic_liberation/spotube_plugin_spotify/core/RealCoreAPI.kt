@@ -67,7 +67,31 @@ class RealCoreAPI(
     }
 
     override suspend fun checkPluginUpdates(currentVersion: SemVer): PluginUpdateInfo? {
-        return null
+        val response = client.get {
+            url("https://api.github.com/repos/$GITHUB_REPO/releases/latest")
+            headers {
+                append("Accept", "application/vnd.github+json")
+                append("User-Agent", "spotube-plugin-spotify")
+            }
+        }
+        if (response.statusCode != 200) {
+            console.log("[RealCoreAPI.checkPluginUpdates] GitHub responded with ${response.statusCode}")
+            return null
+        }
+
+        val release = response.body<GitHubRelease>()
+        val latestVersion = runCatching { SemVer.parse(release.tagName.removePrefix("v")) }
+            .getOrNull() ?: return null
+
+        if (latestVersion <= currentVersion) return null
+
+        val asset = release.assets.firstOrNull { it.name.endsWith(".smplug") } ?: return null
+
+        return PluginUpdateInfo(
+            latestVersion = latestVersion.toString(),
+            directDownloadUrl = asset.browserDownloadUrl,
+            releaseNotes = release.body ?: release.htmlUrl
+        )
     }
 
     override fun supportMarkdownText(currentVersion: SemVer): String {
@@ -266,6 +290,8 @@ class RealCoreAPI(
 
 
     companion object {
+        private const val GITHUB_REPO = "sonic-liberation/spotube-plugin-spotify"
+
         private val exp = Regex(
             """^https://accounts\.spotify\.com/[^/]+/status($|\?.*)$"""
         )

@@ -84,8 +84,13 @@ jobs:
         with:
           name: spotify-smplug
 
-      - name: Name the asset
-        run: mv plugin-production.smplug spotube-plugin-spotify.smplug
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          path: repo
+
+      - name: Backport legacy plugin
+        run: repo/scripts/backport-legacy-plugin.sh plugin-production.smplug plugin.smplug 0.2.2
 
       - name: Publish release
         env:
@@ -97,14 +102,14 @@ jobs:
           if [ "$CHANNEL" = "continuous" ]; then
             # Recreate the continuous tag so it always points at the commit that was just built
             gh release delete continuous --yes --cleanup-tag || true
-            gh release create continuous spotube-plugin-spotify.smplug \
+            gh release create continuous plugin.smplug \
               --target "$GITHUB_SHA" \
               --title "Continuous ($(date -u +%Y-%m-%d))" \
               --notes "Built from ${GITHUB_SHA::7}. Not a stable release." \
               --prerelease
           else
-            gh release create "v$VERSION" spotube-plugin-spotify.smplug \
+            gh release create "$VERSION" plugin.smplug \
               --target "$GITHUB_SHA" \
-              --title "v$VERSION" \
+              --title "$VERSION" \
               --generate-notes
           fi

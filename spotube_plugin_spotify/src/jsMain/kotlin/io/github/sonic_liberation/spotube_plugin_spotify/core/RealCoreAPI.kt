@@ -290,7 +290,7 @@ class RealCoreAPI(
 
 
     companion object {
-        private const val GITHUB_REPO = "sonic-liberation/spotube-plugin-spotify"
+        private const val GITHUB_REPO = "pgwiz/spotube-plugin-spotify"
 
         private val exp = Regex(
             """^https://accounts\.spotify\.com/[^/]+/status($|\?.*)$"""

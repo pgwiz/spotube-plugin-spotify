@@ -47,8 +47,8 @@ spotubePlugin {
     abilities = listOf(PluginAbility.METADATA)
     license = "AGPL-3.0-or-later"
     contact = "sonic.liberation.69@gmail.com"
-    repository = "https://github.com/sonic-liberation/spotube-plugin-spotify"
-    bugs = "https://github.com/sonic-liberation/spotube-plugin-spotify/issues"
+    repository = "https://github.com/pgwiz/spotube-plugin-spotify"
+    bugs = "https://github.com/pgwiz/spotube-plugin-spotify/issues"
 }
 
 buildkonfig {

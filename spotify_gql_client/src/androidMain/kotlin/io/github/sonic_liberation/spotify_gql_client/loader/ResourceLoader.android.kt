@@ -17,9 +17,15 @@
 
 package io.github.sonic_liberation.spotify_gql_client.loader
 
-@Suppress(names = ["EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING"])
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class ResourceLoader actual constructor() {
     actual fun readText(path: String): String {
-        TODO("Not yet implemented")
+        val normalized = path.removePrefix("/")
+        val stream = this::class.java.classLoader?.getResourceAsStream(normalized)
+            ?: this::class.java.getResourceAsStream("/$normalized")
+            ?: javaClass.classLoader?.getResourceAsStream(normalized)
+            ?: throw IllegalArgumentException("Resource not found at: $path")
+
+        return stream.bufferedReader().use { it.readText() }
     }
 }

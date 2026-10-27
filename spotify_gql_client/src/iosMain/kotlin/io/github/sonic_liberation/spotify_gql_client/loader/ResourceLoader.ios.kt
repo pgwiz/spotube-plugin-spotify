@@ -17,9 +17,20 @@
 
 package io.github.sonic_liberation.spotify_gql_client.loader
 
-@Suppress(names = ["EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING"])
+import platform.Foundation.NSBundle
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.stringWithContentsOfFile
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class ResourceLoader actual constructor() {
     actual fun readText(path: String): String {
-        TODO("Not yet implemented")
+        val cleanPath = path.removePrefix("/")
+        val resourceName = cleanPath.substringBeforeLast(".")
+        val resourceType = cleanPath.substringAfterLast(".", "")
+        val bundlePath = NSBundle.mainBundle.pathForResource(resourceName, ofType = resourceType)
+            ?: throw IllegalArgumentException("Resource not found at: $path")
+        return NSString.stringWithContentsOfFile(bundlePath, encoding = NSUTF8StringEncoding, error = null)
+            ?: throw IllegalArgumentException("Could not read resource at: $path")
     }
 }

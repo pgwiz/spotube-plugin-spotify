@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Fixes
+- **loader**: Implement platform `ResourceLoader` on Android (`classLoader.getResourceAsStream`) and iOS (`NSBundle.mainBundle.pathForResource`), resolving 40 unit test failures in `:spotify_gql_client:testAndroidHostTest`.
 - **spotify_gql_client & spotube_plugin_spotify**: Add keyless Spotify embed fallback parsing `https://open.spotify.com/embed/track/{id}` (`<script id="__NEXT_DATA__">`) extracting track title, artists, duration, thumbnails, and direct preview audio URL (`p.scdn.co`) when GQL `getTrack` returns null, 401, or 429.
 - **build**: Increase Gradle wrapper network timeout to 600,000ms (10m) to prevent socket read timeouts on large distribution downloads.
 

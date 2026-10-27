@@ -114,4 +114,70 @@ class TracksClientTest {
         assertNotNull(res)
         assertNotNull(res.data.trackUnion)
     }
+
+    @Test
+    fun `TracksClient getTrackEmbed parses Next Data embed html correctly`() = runTest {
+        val embedHtml = """
+            <!DOCTYPE html><html><head></head><body>
+            <script id="__NEXT_DATA__" type="application/json">
+            {
+              "props": {
+                "pageProps": {
+                  "state": {
+                    "data": {
+                      "entity": {
+                        "type": "track",
+                        "name": "Never Gonna Give You Up",
+                        "uri": "spotify:track:4cOdK2wGLETKBW3PvgPWqT",
+                        "id": "4cOdK2wGLETKBW3PvgPWqT",
+                        "title": "Never Gonna Give You Up",
+                        "artists": [
+                          {
+                            "name": "Rick Astley",
+                            "uri": "spotify:artist:0gxyHStUsqpMadRV0Di1Qt"
+                          }
+                        ],
+                        "releaseDate": {
+                          "isoString": "1987-11-12T00:00:00Z"
+                        },
+                        "duration": 213573,
+                        "isPlayable": true,
+                        "isExplicit": false,
+                        "audioPreview": {
+                          "url": "https://p.scdn.co/mp3-preview/40a780b231e5ed130483bec7917b6c9a4f8a4708"
+                        },
+                        "visualIdentity": {
+                          "image": [
+                            {
+                              "url": "https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02baf89eb11ec7c657805d2da0",
+                              "maxHeight": 300,
+                              "maxWidth": 300
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            </script></body></html>
+        """.trimIndent()
+
+        httpClient.mockGetResponse = HttpResponse(
+            statusCode = 200,
+            headers = emptyMap(),
+            body = embedHtml
+        )
+
+        val track = tracks.getTrackEmbed("4cOdK2wGLETKBW3PvgPWqT")
+        assertNotNull(track)
+        assertEquals("4cOdK2wGLETKBW3PvgPWqT", track.id)
+        assertEquals("Never Gonna Give You Up", track.title)
+        assertEquals(213573L, track.durationMs)
+        assertEquals(1, track.artists.size)
+        assertEquals("Rick Astley", track.artists.first().name)
+        assertEquals("https://p.scdn.co/mp3-preview/40a780b231e5ed130483bec7917b6c9a4f8a4708", track.previewUrl)
+        assertEquals(1, track.images.size)
+    }
 }

@@ -1,6 +1,28 @@
 # Session Operational Changelog
 _Append-only. Newest first. Never edit past entries._
 
+## [2026-10-27 21:30:00 UTC] — Branch `main`
+- **Event**: Keyless Spotify Embed Fallback & Resilience
+- **Operational Scope**: Implemented keyless Spotify embed fallback parsing `https://open.spotify.com/embed/track/{id}` (`<script id="__NEXT_DATA__">`) to extract metadata and audio preview MP3s (`p.scdn.co`) when GQL `getTrack` returns null or fails with 401/429.
+
+### AST & Code Modifications
+- `spotify_gql_client/src/commonMain/kotlin/io/github/sonic_liberation/spotify_gql_client/gql/tracks/TracksModels.kt`:
+  - Added `SpotifyEmbedTrack`, `SpotifyEmbedArtist`, and `SpotifyEmbedImage` data models.
+- `spotify_gql_client/src/commonMain/kotlin/io/github/sonic_liberation/spotify_gql_client/gql/tracks/TracksClient.kt`:
+  - Implemented `getTrackEmbed(id)` and portable string-indexing parser `parseTrackFromEmbedHtml(html, defaultId)`.
+  - Added `runCatching` resilience around `getTrack(uri)`.
+- `spotube_plugin_spotify/src/commonMain/kotlin/io/github/sonic_liberation/spotube_plugin_spotify/core/RealMetadataTrackAPI.kt`:
+  - Updated `getTrack(id)` to fall back to `spotifyGQLClient.tracks.getTrackEmbed(id)` when GQL track response is null.
+  - Implemented `SpotifyEmbedTrack.toMetadataTrack()` mapper with direct audio preview URL fallback in `externalUri`.
+- `spotify_gql_client/src/commonTest/kotlin/io/github/sonic_liberation/spotify_gql_client/TracksClientTest.kt`:
+  - Added unit test verifying `__NEXT_DATA__` embed HTML parsing.
+
+### Command Results
+- `./gradlew :spotify_gql_client:jvmTest`: Passed.
+- `./gradlew :spotube_plugin_spotify:jvmTest`: Passed.
+- `./gradlew packageProductionPlugin packageDevelopmentPlugin`: BUILD SUCCESSFUL.
+
+---
 ## [2026-10-27 11:19:17 UTC] — Branch `main` (HEAD: `c18c85f`)
 - **Event**: Automated Context Compaction
 - **Operational Scope**: Synchronized repository ground-truth into `dev_md_guides/`

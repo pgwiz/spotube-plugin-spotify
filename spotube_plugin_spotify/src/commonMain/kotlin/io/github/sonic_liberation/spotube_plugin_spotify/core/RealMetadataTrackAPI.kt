@@ -31,14 +31,20 @@ import io.github.sonic_liberation.spotify_gql_client.gql.SpotifyGQLClient
 import io.github.sonic_liberation.spotify_gql_client.gql.UserLibraryTrackResponse
 import io.github.sonic_liberation.spotify_gql_client.gql.tracks.AlbumOfTrackUnion
 import io.github.sonic_liberation.spotify_gql_client.gql.tracks.GetTrackResponse
+import io.github.sonic_liberation.spotify_gql_client.gql.tracks.SpotifyEmbedTrack
 import io.github.sonic_liberation.spotify_gql_client.gql.tracks.TrackUnion
 
 class RealMetadataTrackAPI(val spotifyGQLClient: SpotifyGQLClient) : MetadataTrackAPI {
     override suspend fun getTrack(id: String): MetadataTrack {
         val uri = "spotify:track:$id"
-        val response = spotifyGQLClient.tracks.getTrack(uri)
+        val response = runCatching { spotifyGQLClient.tracks.getTrack(uri) }.getOrNull()
+        if (response != null) {
+            return response.toMetadataTrack()
+        }
+
+        val embedTrack = runCatching { spotifyGQLClient.tracks.getTrackEmbed(id) }.getOrNull()
             ?: throw Exception("Track not found: $id")
-        return response.toMetadataTrack()
+        return embedTrack.toMetadataTrack()
     }
 
     override suspend fun savedTracks(pagination: PaginationStrategy?): PaginationResult<MetadataTrack> {
@@ -206,4 +212,41 @@ class RealMetadataTrackAPI(val spotifyGQLClient: SpotifyGQLClient) : MetadataTra
         )
     }
 
+    private fun SpotifyEmbedTrack.toMetadataTrack(): MetadataTrack {
+        val artistsList = artists.map {
+            MetadataArtist.Basic(
+                id = it.id,
+                name = it.name,
+                thumbnails = emptyList(),
+                externalUri = it.uri,
+            )
+        }
+        val thumbs = images.map { Thumbnail(it.url, it.width ?: 0, it.height ?: 0) }
+
+        return MetadataTrack(
+            id = id,
+            title = title,
+            durationMs = durationMs,
+            trackNumber = 1,
+            discNumber = 1,
+            artists = artistsList,
+            album = MetadataAlbum.Detailed(
+                id = "",
+                title = title,
+                description = null,
+                thumbnails = thumbs,
+                albumType = MetadataAlbumType.Album,
+                artists = emptyList(),
+                externalUri = "",
+                releaseDate = releaseDate,
+                genres = emptyList(),
+                trackCount = 1,
+            ),
+            explicit = isExplicit,
+            popularity = null,
+            isrcCode = null,
+            externalUri = previewUrl ?: "spotify:track:$id",
+            thumbnails = thumbs,
+        )
+    }
 }

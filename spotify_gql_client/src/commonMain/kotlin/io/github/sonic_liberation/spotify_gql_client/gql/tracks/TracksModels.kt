@@ -220,3 +220,30 @@ data class AlbumImageSource(
 data class AlbumTracks(
     val totalCount: Int,
 )
+
+@Serializable
+data class SpotifyEmbedTrack(
+    val id: String,
+    val title: String,
+    val artists: List<SpotifyEmbedArtist>,
+    val durationMs: Long,
+    val previewUrl: String? = null,
+    val images: List<SpotifyEmbedImage> = emptyList(),
+    val releaseDate: String? = null,
+    val isExplicit: Boolean = false,
+)
+
+@Serializable
+data class SpotifyEmbedArtist(
+    val name: String,
+    val uri: String,
+    val id: String,
+)
+
+@Serializable
+data class SpotifyEmbedImage(
+    val url: String,
+    val width: Int? = null,
+    val height: Int? = null,
+)
+

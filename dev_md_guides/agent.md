@@ -41,17 +41,17 @@
 | File | Lines | Category | Status | Last Modified |
 |---|---|---|---|---|
 | `agent.md` | 57 | Master Index | Active | 2026-10-27 |
-| `branch.md` | 23 | Worktree State | Active | 2026-10-27 |
-| `changelog.md` | 11 | Operational Audit | Active | 2026-10-27 |
+| `branch.md` | 31 | Worktree State | Active | 2026-10-27 |
+| `changelog.md` | 50 | Operational Audit | Active | 2026-10-27 |
 | `credentials.md` | 33 | Secrets (Local) | Gitignored | 2026-10-27 |
 | `credentials.md.sample` | 33 | Secrets (Sample) | Committed | 2026-10-27 |
 | `directory.md` | 43 | Environment (Local) | Gitignored | 2026-10-27 |
 | `directory.md.sample` | 43 | Environment (Sample) | Committed | 2026-10-27 |
-| `features.md` | 10 | Feature Matrix | Active | 2026-10-27 |
+| `features.md` | 17 | Feature Matrix | Active | 2026-10-27 |
 | `flow.md` | 40 | Execution Flows | Active | 2026-10-27 |
-| `gotchas.md` | 26 | Failure Modes | Active | 2026-10-27 |
+| `gotchas.md` | 42 | Failure Modes | Active | 2026-10-27 |
 | `memory.md` | 10 | Decisions & ADRs | Active | 2026-10-27 |
 | `playbook.md` | 92 | Operational Playbooks | Active | 2026-10-27 |
-| `solution.md` | 81 | Proven Solutions | Active | 2026-10-27 |
-| `structure.md` | 125 | Architecture | Active | 2026-10-27 |
+| `solution.md` | 108 | Proven Solutions | Active | 2026-10-27 |
+| `structure.md` | 128 | Architecture | Active | 2026-10-27 |
 <!-- END AUTO-GENERATED INVENTORY -->

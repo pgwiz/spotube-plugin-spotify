@@ -13,12 +13,13 @@ on:
   push:
     tags:
       - 'v*'
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - '*.*.*'
+      - '[0-9]*'
       - 'continuous'
 
 concurrency:
   group: publish-${{ github.event.inputs.channel || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   MODULE: spotube_plugin_spotify
@@ -103,9 +104,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          CHANNEL: ${{ github.event.inputs.channel || (startsWith(github.ref, 'refs/tags/continuous') && 'continuous' || 'stable') }}
+          INPUT_CHANNEL: ${{ github.event.inputs.channel }}
           VERSION: ${{ needs.build.outputs.plugin-version }}
         run: |
+          REF_NAME="${GITHUB_REF_NAME:-}"
+          if [ "$INPUT_CHANNEL" = "continuous" ] || [ "$REF_NAME" = "continuous" ]; then
+            CHANNEL="continuous"
+          else
+            CHANNEL="stable"
+          fi
+
           if [ "$CHANNEL" = "continuous" ]; then
             # Recreate the continuous tag so it always points at the commit that was just built
             gh release delete continuous --yes --cleanup-tag || true
@@ -115,9 +123,10 @@ jobs:
               --notes "Built from ${GITHUB_SHA::7}. Not a stable release." \
               --prerelease
           else
-            TAG_NAME="${VERSION}"
-            if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-              TAG_NAME="${{ github.ref_name }}"
+            if [ "${GITHUB_REF_TYPE:-}" = "tag" ] && [ -n "$REF_NAME" ]; then
+              TAG_NAME="$REF_NAME"
+            else
+              TAG_NAME="${VERSION}"
             fi
             if gh release view "$TAG_NAME" >/dev/null 2>&1; then
               echo "Release $TAG_NAME exists, uploading assets..."

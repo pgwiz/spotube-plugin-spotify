@@ -57,9 +57,7 @@ kotlin {
     android {
         namespace = "io.github.sonic_liberation.spotify_gql_client"
         compileSdk {
-            version = release(36) {
-                minorApiLevel = 1
-            }
+            version = release(37)
         }
         minSdk = 24
 

@@ -1,5 +1,5 @@
 # Codebase Architecture & Directory Dependency Graph
-_Last regenerated: 2026-10-27 09:45:08 UTC by dev-md-compactor_
+_Last regenerated: 2026-10-27 11:07:56 UTC by dev-md-compactor_
 
 ## Project Manifests & Build Tools
 - *(No standard build manifests detected at root)*
@@ -12,8 +12,11 @@ _Last regenerated: 2026-10-27 09:45:08 UTC by dev-md-compactor_
 ### `gradle/wrapper/`
 - **Files (2)**: `gradle-wrapper.jar, gradle-wrapper.properties`
 
+### `kotlin-js-store/`
+- **Files (1)**: `yarn.lock`
+
 ### `root/`
-- **Files (10)**: `AGENTS.md, CHANGELOG.md, LICENSE, README.MD, build.gradle.kts, gradle.properties, gradlew, gradlew.bat` (+2 more)
+- **Files (11)**: `AGENTS.md, CHANGELOG.md, LICENSE, README.MD, build.gradle.kts, dev_com_agent.md, gradle.properties, gradlew` (+3 more)
 
 ### `scripts/`
 - **Files (1)**: `backport-legacy-plugin.sh`

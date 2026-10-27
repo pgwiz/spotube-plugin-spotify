@@ -1,6 +1,22 @@
 # Session Operational Changelog
 _Append-only. Newest first. Never edit past entries._
 
+## [2026-10-27 11:07:56 UTC] — Branch `main` (HEAD: `8bd6444`)
+- **Event**: Automated Context Compaction
+- **Operational Scope**: Synchronized repository ground-truth into `dev_md_guides/`
+
+### AST & Code Modifications
+- *No AST code modifications detected in active diff.*
+
+---
+## [2026-10-27 11:06:44 UTC] — Branch `main` (HEAD: `8bd6444`)
+- **Event**: Automated Context Compaction
+- **Operational Scope**: Synchronized repository ground-truth into `dev_md_guides/`
+
+### AST & Code Modifications
+- *No AST code modifications detected in active diff.*
+
+---
 ## [2026-10-27 09:43:00 UTC] — Branch `main` (HEAD: `79be863`)
 - **Event**: Plugin Release 1.0.0 & Release Workflow Modernization
 - **Operational Scope**: Created GitHub Release `1.0.0` on `pgwiz/spotube-plugin-spotify` with dual assets (`plugin.smplug` and `plugin-production.smplug`), enhanced GitHub Actions release workflow with tag triggers and idempotent upload, added cross-platform Python fallback to `scripts/backport-legacy-plugin.sh`, updated README and `RealCoreAPI.kt` with manual install URLs and legacy reference, and documented manual install flow in Spotube.

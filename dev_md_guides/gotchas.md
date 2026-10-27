@@ -18,10 +18,25 @@ _Maintained by the dev-md-compactor Conversational Reflection Protocol._
 
 ## 2. Minor Quirks (Silent Defaults, Formatting & Syntax Edge Cases)
 
-### GOTCHA-002: GitHub CLI `gh release create` Failure on Pre-Existing Release/Tag
-- **Severity**: Minor Quirk
-- **Trigger / Symptom**: Running `gh release create "$VERSION"` fails if the release or git tag was already created or if the CI workflow is re-triggered on an existing tag.
-- **Root Cause ("Why it failed")**: `gh release create` expects the release not to exist unless specifically instructed.
-- **Exact Fix**: In `release.yml`, inspect release existence using `gh release view "$TAG_NAME" >/dev/null 2>&1`; if present, run `gh release upload "$TAG_NAME" ... --clobber`; otherwise create it fresh.
-- **Mechanics ("Why the fix worked")**: Guarantees idempotent CI execution regardless of whether a release was triggered manually or via tag push.
+### GOTCHA-003: GitHub Actions Push Tag Filter Uses fnmatch (Not Regex) and Expression Boolean Coercion
+- **Severity**: Major Blocker
+- **Trigger / Symptom**: GitHub Actions release workflow failed to trigger on pushed tags like `1.0.0`, and `CHANNEL` resolved to `"true"` rather than `"continuous"` or `"stable"`.
+- **Root Cause ("Why it failed")**: `push.tags` in GHA uses `fnmatch` where `+` is a literal plus, not a regex quantifier (`[0-9]+.[0-9]+.[0-9]+*` required literal plus signs). Furthermore, GHA expressions treat `&&` and `||` strictly as boolean operators returning `true`/`false`.
+- **Exact Fix**: Updated `push.tags` patterns to valid globs (`'v*'`, `'*.*.*'`, `'[0-9]*'`, `'continuous'`), and moved channel/tag name resolution into bash script logic.
+- **Mechanics ("Why the fix worked")**: Standard glob matching matches all semver and release tags, and native bash conditional evaluation preserves string literals without boolean coercion.
+
+### GOTCHA-004: GitHub Repository Search API Excludes Forks Unless `fork:true` is Specified
+- **Severity**: Major Blocker
+- **Trigger / Symptom**: Spotube's Discover tab could not locate `pgwiz/spotube-plugin-spotify` despite having the release and metadata.
+- **Root Cause ("Why it failed")**: GitHub's search API excludes forked repositories by default when querying `topic:spotube-zipline-plugin`. Additionally, the repository initially lacked the `spotube-zipline-plugin` topic.
+- **Exact Fix**: Added repository topics (`spotube-zipline-plugin`, `spotube`, `spotube-plugin`, `spotube-metadata-plugin`) to `pgwiz/spotube-plugin-spotify` via `gh repo edit`, and updated Spotube's `GitHubPluginRepository.kt` query to `topic:spotube-zipline-plugin fork:true`.
+- **Mechanics ("Why the fix worked")**: Guarantees that official plugins, community plugins, and verified forks appear in Spotube's in-app plugin catalog.
+
+### GOTCHA-005: AGP CheckAarMetadata Failure with Android SDK 36.1 on `plugin_interfaces:0.1.0`
+- **Severity**: Major Blocker
+- **Trigger / Symptom**: `./gradlew check` failed with `:spotify_gql_client:checkAndroidMainAarMetadata` stating dependency `org.spotube.spotube:plugin_interfaces-android:0.1.0` requires compiling against Android API version 37 or later.
+- **Root Cause ("Why it failed")**: `spotify_gql_client/build.gradle.kts` was pinned to `compileSdk { version = release(36) { minorApiLevel = 1 } }`.
+- **Exact Fix**: Updated `compileSdk` to `release(37)`.
+- **Mechanics ("Why the fix worked")**: Satisfies the AAR metadata constraint declared by `plugin_interfaces-android:0.1.0` and allows Gradle AAR checks to pass cleanly.
+
 

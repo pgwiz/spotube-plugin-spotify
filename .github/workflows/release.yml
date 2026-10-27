@@ -10,9 +10,14 @@ on:
           - stable
           - continuous
         default: stable
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'continuous'
 
 concurrency:
-  group: publish-${{ inputs.channel }}
+  group: publish-${{ github.event.inputs.channel || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -27,10 +32,10 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Install JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
@@ -72,7 +77,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: GitHub release (${{ inputs.channel }})
+    name: GitHub release (${{ github.event.inputs.channel || 'tag' }})
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -85,31 +90,43 @@ jobs:
           name: spotify-smplug
 
       - name: Clone repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           path: repo
 
       - name: Backport legacy plugin
-        run: repo/scripts/backport-legacy-plugin.sh plugin-production.smplug plugin.smplug 0.2.2
+        run: |
+          chmod +x repo/scripts/backport-legacy-plugin.sh
+          repo/scripts/backport-legacy-plugin.sh plugin-production.smplug plugin.smplug 0.2.2
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          CHANNEL: ${{ inputs.channel }}
+          CHANNEL: ${{ github.event.inputs.channel || (startsWith(github.ref, 'refs/tags/continuous') && 'continuous' || 'stable') }}
           VERSION: ${{ needs.build.outputs.plugin-version }}
         run: |
           if [ "$CHANNEL" = "continuous" ]; then
             # Recreate the continuous tag so it always points at the commit that was just built
             gh release delete continuous --yes --cleanup-tag || true
-            gh release create continuous plugin.smplug \
+            gh release create continuous plugin.smplug plugin-production.smplug \
               --target "$GITHUB_SHA" \
               --title "Continuous ($(date -u +%Y-%m-%d))" \
               --notes "Built from ${GITHUB_SHA::7}. Not a stable release." \
               --prerelease
           else
-            gh release create "$VERSION" plugin.smplug \
-              --target "$GITHUB_SHA" \
-              --title "$VERSION" \
-              --generate-notes
+            TAG_NAME="${VERSION}"
+            if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+              TAG_NAME="${{ github.ref_name }}"
+            fi
+            if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+              echo "Release $TAG_NAME exists, uploading assets..."
+              gh release upload "$TAG_NAME" plugin.smplug plugin-production.smplug --clobber
+            else
+              echo "Creating release $TAG_NAME..."
+              gh release create "$TAG_NAME" plugin.smplug plugin-production.smplug \
+                --target "$GITHUB_SHA" \
+                --title "$TAG_NAME" \
+                --generate-notes
+            fi
           fi

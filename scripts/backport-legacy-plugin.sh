@@ -40,9 +40,18 @@ REPO=${GITHUB_REPOSITORY:-pgwiz/spotube-plugin-spotify}
 LEGACY_REPO=${LEGACY_REPO:-sonic-liberation/spotube-plugin-spotify}
 LEGACY_URL="https://github.com/$LEGACY_REPO/releases/download/$LEGACY_TAG/plugin.smplug"
 
-for cmd in curl jq unzip zip; do
+for cmd in curl unzip; do
   command -v "$cmd" >/dev/null || { echo "Missing required command: $cmd" >&2; exit 1; }
 done
+
+if ! command -v jq >/dev/null && ! command -v python3 >/dev/null && ! command -v python >/dev/null; then
+  echo "Missing required JSON processor: jq or python/python3" >&2
+  exit 1
+fi
+if ! command -v zip >/dev/null && ! command -v python3 >/dev/null && ! command -v python >/dev/null; then
+  echo "Missing required archive utility: zip or python/python3" >&2
+  exit 1
+fi
 
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
@@ -60,8 +69,25 @@ done
 
 # Shallow merge: every top-level key from the current manifest overrides the legacy one,
 # except abilities, which are unioned so legacy-only abilities (e.g. authentication) survive
-jq -s '.[0] + .[1] + {abilities: ((.[1].abilities // []) + (.[0].abilities // []) | reduce .[] as $a ([]; if index([$a]) then . else . + [$a] end))}' \
-  "$WORK/legacy/plugin.json" "$WORK/current/plugin.json" > "$WORK/plugin.json"
+if command -v jq >/dev/null; then
+  jq -s '.[0] + .[1] + {abilities: ((.[1].abilities // []) + (.[0].abilities // []) | reduce .[] as $a ([]; if index([$a]) then . else . + [$a] end))}' \
+    "$WORK/legacy/plugin.json" "$WORK/current/plugin.json" > "$WORK/plugin.json"
+else
+  PY_CMD=$(command -v python3 || command -v python)
+  "$PY_CMD" -c '
+import json, sys
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    legacy = json.load(f)
+with open(sys.argv[2], "r", encoding="utf-8") as f:
+    current = json.load(f)
+merged = {**legacy, **current}
+leg_ab = legacy.get("abilities") or []
+cur_ab = current.get("abilities") or []
+merged["abilities"] = list(dict.fromkeys(cur_ab + leg_ab))
+with open(sys.argv[3], "w", encoding="utf-8") as f:
+    json.dump(merged, f, indent=2)
+' "$WORK/legacy/plugin.json" "$WORK/current/plugin.json" "$WORK/plugin.json"
+fi
 mv "$WORK/plugin.json" "$WORK/current/plugin.json"
 
 # Add legacy-only files without overwriting anything from the current build
@@ -75,7 +101,22 @@ done
 
 mkdir -p "$(dirname "$OUTPUT")"
 rm -f "$OUTPUT"
-(cd "$WORK/current" && zip -qrX "$OUTPUT" .)
+if command -v zip >/dev/null; then
+  (cd "$WORK/current" && zip -qrX "$OUTPUT" .)
+else
+  PY_CMD=$(command -v python3 || command -v python)
+  "$PY_CMD" -c '
+import zipfile, os, sys
+out_path = sys.argv[1]
+src_dir = sys.argv[2]
+with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zf:
+    for root, _, files in os.walk(src_dir):
+        for file in files:
+            full = os.path.join(root, file)
+            arcname = os.path.relpath(full, src_dir)
+            zf.write(full, arcname)
+' "$OUTPUT" "$WORK/current"
+fi
 
 echo "Merged plugin.json:"
 cat "$WORK/current/plugin.json"

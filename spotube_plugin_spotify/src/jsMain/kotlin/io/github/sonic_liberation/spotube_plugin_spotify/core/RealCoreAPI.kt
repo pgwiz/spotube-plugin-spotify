@@ -95,7 +95,19 @@ class RealCoreAPI(
     }
 
     override fun supportMarkdownText(currentVersion: SemVer): String {
-        return "Support us please!"
+        return """
+            ### Spotify Plugin for Spotube
+            
+            Spotify metadata provider plugin for Spotube.
+            
+            #### Manual Installation / Download URLs:
+            - **Latest Release**: `https://github.com/pgwiz/spotube-plugin-spotify/releases/latest/download/plugin.smplug`
+            - **v1.0.0 (Backported)**: `https://github.com/pgwiz/spotube-plugin-spotify/releases/download/1.0.0/plugin.smplug`
+            - **v1.0.0 (Production Zipline)**: `https://github.com/pgwiz/spotube-plugin-spotify/releases/download/1.0.0/plugin-production.smplug`
+            - **Legacy Plugin Reference**: `https://github.com/sonic-liberation/spotube-plugin-spotify/releases/download/0.2.2/plugin.smplug`
+            
+            To install manually, paste the URL above into **Settings > Plugins > Install a Plugin > Download from URL**.
+        """.trimIndent()
     }
 
     override val requiresAuthentication = true

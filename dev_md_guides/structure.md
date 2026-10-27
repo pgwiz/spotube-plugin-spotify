@@ -1,5 +1,5 @@
 # Codebase Architecture & Directory Dependency Graph
-_Last regenerated: 2026-10-27 11:16:08 UTC by dev-md-compactor_
+_Last regenerated: 2026-10-27 11:19:17 UTC by dev-md-compactor_
 
 ## Project Manifests & Build Tools
 - *(No standard build manifests detected at root)*

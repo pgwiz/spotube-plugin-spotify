@@ -105,7 +105,7 @@ class RealCoreAPI(
             - **v1.0.0 (Backported)**: `https://github.com/pgwiz/spotube-plugin-spotify/releases/download/1.0.0/plugin.smplug`
             - **v1.0.0 (Production Zipline)**: `https://github.com/pgwiz/spotube-plugin-spotify/releases/download/1.0.0/plugin-production.smplug`
             - **Legacy Plugin Reference**: `https://github.com/sonic-liberation/spotube-plugin-spotify/releases/download/0.2.2/plugin.smplug`
-              *(Format: `https://github.com/$LEGACY_REPO/releases/download/$LEGACY_TAG/plugin.smplug` where `$LEGACY_REPO=sonic-liberation/spotube-plugin-spotify` and `$LEGACY_TAG=0.2.2`)*
+              *(Format: `https://github.com/${'$'}LEGACY_REPO/releases/download/${'$'}LEGACY_TAG/plugin.smplug` where `${'$'}LEGACY_REPO=sonic-liberation/spotube-plugin-spotify` and `${'$'}LEGACY_TAG=0.2.2`)*
             
             To install manually, paste the URL above into **Settings > Plugins > Install a Plugin > Download from URL**.
         """.trimIndent()

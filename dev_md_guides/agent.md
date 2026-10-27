@@ -41,8 +41,8 @@
 | File | Lines | Category | Status | Last Modified |
 |---|---|---|---|---|
 | `agent.md` | 57 | Master Index | Active | 2026-10-27 |
-| `branch.md` | 31 | Worktree State | Active | 2026-10-27 |
-| `changelog.md` | 50 | Operational Audit | Active | 2026-10-27 |
+| `branch.md` | 25 | Worktree State | Active | 2026-10-27 |
+| `changelog.md` | 58 | Operational Audit | Active | 2026-10-27 |
 | `credentials.md` | 33 | Secrets (Local) | Gitignored | 2026-10-27 |
 | `credentials.md.sample` | 33 | Secrets (Sample) | Committed | 2026-10-27 |
 | `directory.md` | 43 | Environment (Local) | Gitignored | 2026-10-27 |

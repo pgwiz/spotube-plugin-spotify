@@ -30,14 +30,22 @@ import io.ktor.http.takeFrom
 class RealHttpClientAPI: HttpClientAPI {
     val httpClient = HttpClient(CIO)
 
-    suspend fun request(
-        method: HttpMethod,
+    override suspend fun request(
+        method: org.spotube.plugin_interfaces.host_apis.HttpMethod,
         url: String,
         requestHeaders: Map<String, String>?,
         body: String?
     ): HttpResponse {
         val res = httpClient.request {
-            this.method = method
+            this.method = when (method) {
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Get -> io.ktor.http.HttpMethod.Get
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Post -> io.ktor.http.HttpMethod.Post
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Put -> io.ktor.http.HttpMethod.Put
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Delete -> io.ktor.http.HttpMethod.Delete
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Patch -> io.ktor.http.HttpMethod.Patch
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Head -> io.ktor.http.HttpMethod.Head
+                org.spotube.plugin_interfaces.host_apis.HttpMethod.Options -> io.ktor.http.HttpMethod.Options
+            }
             this.url {
                 takeFrom(url)
             }
@@ -52,54 +60,5 @@ class RealHttpClientAPI: HttpClientAPI {
             headers = res.headers.entries().associate { it.key to it.value.joinToString(",") },
             body = res.bodyAsText()
         )
-    }
-
-    override suspend fun get(url: String, requestHeaders: Map<String, String>?): HttpResponse {
-        return request(HttpMethod.Get, url, requestHeaders, null)
-    }
-
-    override suspend fun post(
-        url: String,
-        requestHeaders: Map<String, String>?,
-        body: String
-    ): HttpResponse {
-        return request(HttpMethod.Post, url, requestHeaders, body)
-    }
-
-    override suspend fun put(
-        url: String,
-        requestHeaders: Map<String, String>?,
-        body: String
-    ): HttpResponse {
-        return request(HttpMethod.Put, url, requestHeaders, body)
-    }
-
-    override suspend fun delete(
-        url: String,
-        requestHeaders: Map<String, String>?
-    ): HttpResponse {
-        return request(HttpMethod.Delete, url, requestHeaders, null)
-    }
-
-    override suspend fun options(
-        url: String,
-        requestHeaders: Map<String, String>?
-    ): HttpResponse {
-        return request(HttpMethod.Options, url, requestHeaders, null)
-    }
-
-    override suspend fun head(
-        url: String,
-        requestHeaders: Map<String, String>?
-    ): HttpResponse {
-        return request(HttpMethod.Head, url, requestHeaders, null)
-    }
-
-    override suspend fun patch(
-        url: String,
-        requestHeaders: Map<String, String>?,
-        body: String
-    ): HttpResponse {
-        return request(HttpMethod.Patch, url, requestHeaders, body)
     }
 }

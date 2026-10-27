@@ -119,6 +119,7 @@ class BrowseClientTest {
 
         @Test
         fun `BrowseClient home Deserialization from Spotify API response`() = runTest {
+            if (BuildKonfig.ACCESS_TOKEN == "placeholder") return@runTest
             val res = browse.home(
                 spT = getSpTFromMockCredentials(),
             )
@@ -127,6 +128,7 @@ class BrowseClientTest {
 
         @Test
         fun `BrowseClient section playlist Deserialization from Spotify API response`() = runTest {
+            if (BuildKonfig.ACCESS_TOKEN == "placeholder") return@runTest
             val res = browse.section(
                 "spotify:section:0JQ5DAuChZYPe9iDhh2mJz",
                 getSpTFromMockCredentials()
@@ -136,6 +138,7 @@ class BrowseClientTest {
 
         @Test
         fun `BrowseClient section album Deserialization from Spotify API response`() = runTest {
+            if (BuildKonfig.ACCESS_TOKEN == "placeholder") return@runTest
             val res = browse.section(
                 "spotify:section:0JQ5DAnM3wGh0gz1MXnu3B",
                 getSpTFromMockCredentials()
@@ -145,6 +148,7 @@ class BrowseClientTest {
 
         @Test
         fun `BrowseResponse releases Deserialization from Spotify API response`() = runTest {
+            if (BuildKonfig.ACCESS_TOKEN == "placeholder") return@runTest
             val res = browse.releases()
 
             assertEquals(true, res != null)

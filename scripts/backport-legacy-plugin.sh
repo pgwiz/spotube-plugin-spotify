@@ -35,6 +35,7 @@ fi
 
 CURRENT=$(realpath "$1")
 OUTPUT=$(realpath -m "$2")
+LEGACY_TAG=${3:-0.2.2}
 REPO=${GITHUB_REPOSITORY:-pgwiz/spotube-plugin-spotify}
 LEGACY_REPO=${LEGACY_REPO:-sonic-liberation/spotube-plugin-spotify}
 LEGACY_URL="https://github.com/$LEGACY_REPO/releases/download/$LEGACY_TAG/plugin.smplug"

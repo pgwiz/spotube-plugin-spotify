@@ -19,6 +19,8 @@ package io.github.sonic_liberation.spotify_gql_client.gql
 
 import org.spotube.plugin_interfaces.host_apis.HttpClientAPI
 import org.spotube.plugin_interfaces.host_apis.HttpMethod
+import org.spotube.plugin_interfaces.host_apis.HttpResponse
+import kotlinx.coroutines.delay
 import io.github.sonic_liberation.spotify_gql_client.services.UserAgents
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -161,14 +163,42 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
     protected fun mergeHeaders(requestHeaders: Map<String, String>? = null): Map<String, String> =
         getDefaultHeaders() + (requestHeaders ?: emptyMap())
 
+    suspend fun executeWithRetry(
+        method: HttpMethod,
+        url: String,
+        requestHeaders: Map<String, String>?,
+        body: String?,
+        maxRetries: Int = 3,
+    ): HttpResponse {
+        var delayMs = 1000L
+        for (attempt in 0..maxRetries) {
+            val res = client.request(method, url, mergeHeaders(requestHeaders), body)
+            if ((res.statusCode == 429 || res.statusCode == 503) && attempt < maxRetries) {
+                val retryAfter = res.headers.entries
+                    .firstOrNull { it.key.equals("Retry-After", ignoreCase = true) }
+                    ?.value?.toLongOrNull()
+                val waitTime = if (retryAfter != null && retryAfter in 1..60) {
+                    retryAfter * 1000L
+                } else {
+                    delayMs
+                }
+                delay(waitTime)
+                delayMs *= 2
+                continue
+            }
+            if (res.statusCode >= 400) {
+                throw Exception("Spotify GQL request failed with status code ${res.statusCode} and body ${res.body}")
+            }
+            return res
+        }
+        throw Exception("Spotify GQL request failed after retries")
+    }
+
     protected suspend inline fun <reified T> get(
         url: String,
         requestHeaders: Map<String, String>? = null,
     ): T? {
-        val res = client.request(HttpMethod.Get, url, mergeHeaders(requestHeaders), null)
-        if (res.statusCode >= 400) {
-            throw Exception("Spotify GQL request failed with status code ${res.statusCode} and body ${res.body}")
-        }
+        val res = executeWithRetry(HttpMethod.Get, url, requestHeaders, null)
 
         if (res.body == null || res.body!!.isBlank()) {
             return null
@@ -184,10 +214,7 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
     ): T? {
         val bodyJson = json.encodeToString(body)
 
-        val res = client.request(HttpMethod.Post, url, mergeHeaders(requestHeaders), bodyJson)
-        if (res.statusCode >= 400) {
-            throw Exception("Spotify GQL request failed with status code ${res.statusCode} and body ${res.body}")
-        }
+        val res = executeWithRetry(HttpMethod.Post, url, requestHeaders, bodyJson)
 
         if (res.body == null || res.body!!.isBlank()) {
             return null
@@ -203,10 +230,7 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
     ): T? {
         val bodyJson = json.encodeToString(body)
 
-        val res = client.request(HttpMethod.Put, url, mergeHeaders(requestHeaders), bodyJson)
-        if (res.statusCode >= 400) {
-            throw Exception("Spotify GQL request failed with status code ${res.statusCode} and body ${res.body}")
-        }
+        val res = executeWithRetry(HttpMethod.Put, url, requestHeaders, bodyJson)
 
         if (res.body == null || res.body!!.isBlank()) {
             return null
@@ -222,10 +246,7 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
         body: B,
     ): T? {
         val bodyJson = json.encodeToString(body)
-        val res = client.request(HttpMethod.Delete, url, mergeHeaders(requestHeaders), bodyJson)
-        if (res.statusCode >= 400) {
-            throw Exception("Spotify GQL request failed with status code ${res.statusCode} and body ${res.body}")
-        }
+        val res = executeWithRetry(HttpMethod.Delete, url, requestHeaders, bodyJson)
 
         if (res.body == null || res.body!!.isBlank()) {
             return null

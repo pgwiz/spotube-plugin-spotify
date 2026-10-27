@@ -112,7 +112,7 @@ data class TrackMutationResponse(
     @Serializable
     data class MutationData(
         val addToLibrary: MutationResult? = null,
-        val applyCurations: List<MutationResult>? = null,
+        val applyCurations: MutationResult? = null,
     )
 
 }

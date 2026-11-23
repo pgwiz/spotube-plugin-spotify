@@ -821,6 +821,7 @@ data class HomeSectionList(
 @Serializable
 data class HomeSectionItem(
     val uri: String? = null,
+    @Serializable(with = SpotifyGQLBaseClient.HomeSectionDataUnionSerializer::class)
     val data: HomeSectionDataUnion? = null,
     val sectionItems: SectionItems? = null,
     @Serializable(with = SpotifyGQLBaseClient.ResponseWrapperSerializer::class)
@@ -836,6 +837,15 @@ sealed interface HomeSectionDataUnion {
 @SerialName("HomeGenericSectionData")
 data class HomeGenericSectionData(
     override val __typename: String = "HomeGenericSectionData",
+    val title: Label? = null,
+    val subtitle: Label? = null,
+    val headerEntity: UnknownTypeContent? = null,
+) : HomeSectionDataUnion
+
+@Serializable
+@SerialName("HomeFeedBaselineSectionData")
+data class HomeFeedBaselineSectionData(
+    override val __typename: String = "HomeFeedBaselineSectionData",
     val title: Label? = null,
     val subtitle: Label? = null,
     val headerEntity: UnknownTypeContent? = null,
@@ -884,6 +894,7 @@ data class HomeUnsupportedSectionData(
 ) : HomeSectionDataUnion
 
 @Serializable
+@SerialName("HomeRecsItemData")
 data class HomeRecsItemData(
     override val __typename: String = "HomeRecsItemData",
 ) : HomeSectionDataUnion
@@ -898,6 +909,7 @@ data class HomeSectionCollection(
 data class HomeSection(
     override val __typename: String = "HomeSection",
     val uri: String? = null,
+    @Serializable(with = SpotifyGQLBaseClient.HomeSectionDataUnionSerializer::class)
     val data: HomeSectionDataUnion? = null,
     val sectionItems: SectionItems? = null,
 ) : ContentItem

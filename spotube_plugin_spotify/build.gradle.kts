@@ -34,11 +34,11 @@ plugins {
 }
 
 spotubePlugin {
-    name = "Spotify"
-    version = "1.1.0"
+    name = "premodified.spotify"
+    version = "1.1.2"
     apiVersion = "0.1.0"
-    description = "Spotify plugin for Spotube metadata fetching"
-    author = "Sonic Liberation"
+    description = "Premodified Spotify plugin for Spotube metadata fetching with enhanced GraphQL compatibility and resilience"
+    author = "pgwiz"
     capabilities = listOf(
         PluginCapability.NETWORK_REQUESTS,
         PluginCapability.PERSISTENT_STORAGE,

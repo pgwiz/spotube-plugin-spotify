@@ -37,6 +37,7 @@ import io.github.sonic_liberation.spotify_gql_client.gql.ArtistResponseWrapper
 import io.github.sonic_liberation.spotify_gql_client.gql.BrowseGenericSectionData
 import io.github.sonic_liberation.spotify_gql_client.gql.BrowseSectionContainerWrapper
 import io.github.sonic_liberation.spotify_gql_client.gql.BrowseSectionItem
+import io.github.sonic_liberation.spotify_gql_client.gql.HomeFeedBaselineSectionData
 import io.github.sonic_liberation.spotify_gql_client.gql.HomeGenericSectionData
 import io.github.sonic_liberation.spotify_gql_client.gql.HomeRecentlyPlayedSectionData
 import io.github.sonic_liberation.spotify_gql_client.gql.HomeSectionItem
@@ -222,11 +223,15 @@ class RealMetadataBrowseAPI(val spotifyGQLClient: SpotifyGQLClient) : MetadataBr
             is HomeRecentlyPlayedSectionData -> (data as HomeRecentlyPlayedSectionData).title?.transformedLabel
                 ?: return null
 
+            is HomeFeedBaselineSectionData -> (data as HomeFeedBaselineSectionData).title?.transformedLabel
+                ?: return null
+
             else -> return null
         }
         val subtitleText = when (data) {
             is HomeGenericSectionData -> (data as HomeGenericSectionData).subtitle?.transformedLabel
             is HomeRecentlyPlayedSectionData -> (data as HomeRecentlyPlayedSectionData).subtitle?.transformedLabel
+            is HomeFeedBaselineSectionData -> (data as HomeFeedBaselineSectionData).subtitle?.transformedLabel
             else -> null
         }
         val contentItems = sectionItems?.items?.mapNotNull { it.content?.toBrowseItem() }.orEmpty()

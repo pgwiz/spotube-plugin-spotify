@@ -19,6 +19,8 @@ package io.github.sonic_liberation.spotify_gql_client
 
 import org.spotube.plugin_interfaces.host_apis.HttpResponse
 import io.github.sonic_liberation.spotify_gql_client.gql.CredentialsFromCookieResult
+import io.github.sonic_liberation.spotify_gql_client.gql.HomeFeedBaselineSectionData
+import io.github.sonic_liberation.spotify_gql_client.gql.HomeUnsupportedSectionData
 import io.github.sonic_liberation.spotify_gql_client.gql.SpotifyGQLBaseClient
 import io.github.sonic_liberation.spotify_gql_client.gql.browse.BrowseClient
 import io.github.sonic_liberation.spotify_gql_client.integration.RealHttpClientAPI
@@ -30,6 +32,8 @@ import io.github.sonic_liberation.spotify_gql_client.mocks.initMockCredentialsFr
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class BrowseClientTest {
     class UnitTests {
@@ -53,6 +57,101 @@ class BrowseClientTest {
             )
 
             assertEquals(true, res != null)
+        }
+
+        @Test
+        fun `BrowseClient home deserializes HomeFeedBaselineSectionData correctly`() = runTest {
+            val jsonPayload = """
+            {
+                "data": {
+                    "home": {
+                        "__typename": "HomeResponsePayload",
+                        "greeting": {
+                            "transformedLabel": "Good morning"
+                        },
+                        "sectionContainer": {
+                            "sections": {
+                                "items": [
+                                    {
+                                        "uri": "spotify:section:0JQ5DAnM3wGh0gz1MXnu4d",
+                                        "data": {
+                                            "__typename": "HomeFeedBaselineSectionData",
+                                            "title": {
+                                                "transformedLabel": "Discover Weekly",
+                                                "translatedBaseText": "Discover Weekly"
+                                            },
+                                            "subtitle": {
+                                                "transformedLabel": "Your weekly mixtape",
+                                                "translatedBaseText": "Your weekly mixtape"
+                                            }
+                                        },
+                                        "sectionItems": {
+                                            "items": [],
+                                            "totalCount": 0
+                                        }
+                                    }
+                                ],
+                                "totalCount": 1
+                            }
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+
+            httpClient.mockPostResponse = HttpResponse(
+                statusCode = 200,
+                headers = emptyMap(),
+                body = jsonPayload
+            )
+
+            val res = browse.home(spT = "SPT")
+            assertEquals(true, res != null)
+            val section = res?.data?.home?.sectionContainer?.sections?.items?.firstOrNull()
+            assertNotNull(section)
+            assertTrue(section.data is HomeFeedBaselineSectionData)
+            val data = section.data as HomeFeedBaselineSectionData
+            assertEquals("Discover Weekly", data.title?.transformedLabel)
+            assertEquals("Your weekly mixtape", data.subtitle?.transformedLabel)
+        }
+
+        @Test
+        fun `BrowseClient home gracefully handles unknown future section types without crashing`() = runTest {
+            val jsonPayload = """
+            {
+                "data": {
+                    "home": {
+                        "__typename": "HomeResponsePayload",
+                        "sectionContainer": {
+                            "sections": {
+                                "items": [
+                                    {
+                                        "uri": "spotify:section:unknown123",
+                                        "data": {
+                                            "__typename": "HomeBrandNewFutureSectionData",
+                                            "unknownField": 123
+                                        }
+                                    }
+                                ],
+                                "totalCount": 1
+                            }
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+
+            httpClient.mockPostResponse = HttpResponse(
+                statusCode = 200,
+                headers = emptyMap(),
+                body = jsonPayload
+            )
+
+            val res = browse.home(spT = "SPT")
+            assertEquals(true, res != null)
+            val section = res?.data?.home?.sectionContainer?.sections?.items?.firstOrNull()
+            assertNotNull(section)
+            assertTrue(section.data is HomeUnsupportedSectionData)
         }
 
         @Test

@@ -99,7 +99,10 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
                 polymorphic(HomeSectionDataUnion::class) {
                     subclass(HomeGenericSectionData::class)
                     subclass(HomeRecentlyPlayedSectionData::class)
+                    subclass(HomeFeedBaselineSectionData::class)
+                    subclass(HomeShortsSectionData::class)
                     subclass(HomeRecsItemData::class)
+                    subclass(HomeUnsupportedSectionData::class)
                     defaultDeserializer { HomeUnsupportedSectionData.serializer() }
                 }
                 polymorphic(BrowseSectionDataUnion::class) {
@@ -108,7 +111,47 @@ abstract class SpotifyGQLBaseClient(protected val client: HttpClientAPI) {
                     subclass(BrowseRelatedSectionData::class)
                     subclass(BrowseShortsSectionData::class)
                     subclass(BrowseUnsupportedSectionData::class)
+                    defaultDeserializer { BrowseUnsupportedSectionData.serializer() }
                 }
+            }
+        }
+    }
+
+    object HomeSectionDataUnionSerializer : KSerializer<HomeSectionDataUnion> {
+        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("HomeSectionDataUnion")
+
+        override fun deserialize(decoder: Decoder): HomeSectionDataUnion {
+            val jsonDecoder = decoder as? JsonDecoder
+                ?: throw IllegalStateException("HomeSectionDataUnion can only be deserialized from JSON")
+            val element = jsonDecoder.decodeJsonElement()
+            val typename = (element as? JsonObject)?.get("__typename")?.jsonPrimitive?.content
+            return try {
+                when (typename) {
+                    "HomeGenericSectionData" -> json.decodeFromJsonElement(HomeGenericSectionData.serializer(), element)
+                    "HomeRecentlyPlayedSectionData" -> json.decodeFromJsonElement(HomeRecentlyPlayedSectionData.serializer(), element)
+                    "HomeFeedBaselineSectionData" -> json.decodeFromJsonElement(HomeFeedBaselineSectionData.serializer(), element)
+                    "HomeShortsSectionData" -> json.decodeFromJsonElement(HomeShortsSectionData.serializer(), element)
+                    "HomeRecsItemData" -> json.decodeFromJsonElement(HomeRecsItemData.serializer(), element)
+                    "HomeUnsupportedSectionData" -> json.decodeFromJsonElement(HomeUnsupportedSectionData.serializer(), element)
+                    else -> {
+                        println("Unknown HomeSectionDataUnion type: $typename, treating as HomeUnsupportedSectionData")
+                        HomeUnsupportedSectionData(__typename = typename ?: "HomeUnsupportedSectionData")
+                    }
+                }
+            } catch (e: Exception) {
+                println("Failed to deserialize HomeSectionDataUnion type: $typename, error: ${e.message}")
+                HomeUnsupportedSectionData(__typename = typename ?: "HomeUnsupportedSectionData")
+            }
+        }
+
+        override fun serialize(encoder: Encoder, value: HomeSectionDataUnion) {
+            when (value) {
+                is HomeGenericSectionData -> encoder.encodeSerializableValue(HomeGenericSectionData.serializer(), value)
+                is HomeRecentlyPlayedSectionData -> encoder.encodeSerializableValue(HomeRecentlyPlayedSectionData.serializer(), value)
+                is HomeFeedBaselineSectionData -> encoder.encodeSerializableValue(HomeFeedBaselineSectionData.serializer(), value)
+                is HomeShortsSectionData -> encoder.encodeSerializableValue(HomeShortsSectionData.serializer(), value)
+                is HomeRecsItemData -> encoder.encodeSerializableValue(HomeRecsItemData.serializer(), value)
+                is HomeUnsupportedSectionData -> encoder.encodeSerializableValue(HomeUnsupportedSectionData.serializer(), value)
             }
         }
     }

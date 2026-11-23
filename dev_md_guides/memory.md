@@ -3,6 +3,7 @@ _Durable knowledge — decisions, gotchas, conventions. Not a log._
 
 ## Architecture decisions
 - **Keyless Spotify Embed Fallback**: When Spotify GraphQL endpoint `getTrack` returns null or throws 401/429 (e.g. unauthenticated sessions, anonymous users, rate limits), `RealMetadataTrackAPI` falls back to querying `https://open.spotify.com/embed/track/{id}` and parsing the embedded JSON payload inside `<script id="__NEXT_DATA__">`. This yields track metadata, artist info, album art, and direct 30s preview MP3 stream URLs from `p.scdn.co` without requiring OAuth tokens.
+- **WebView Cookie Domain Isolation (Plugin API 0.1.0)**: Spotube enforces `cookieDomains` permission checks for plugin WebView access. Spotify plugin explicitly declares `cookieDomains = listOf("spotify.com")` in `spotubePlugin {}` DSL. Without this declaration, WebView cookies for accounts.spotify.com cannot be transferred to Spotube's persistent cookie jar.
 
 ## Gotchas
 - **Cross-platform string parsing in Kotlin/JS / Native**: Avoid JVM-only regex flags like `RegexOption.DOT_MATCHES_ALL` or relying on regex group syntax differences across Kotlin targets. Simple string delimiter matching (`indexOf("<script id=\"__NEXT_DATA__\"")` and `indexOf("</script>")`) is significantly faster and 100% portable across JVM, JS, and Native.

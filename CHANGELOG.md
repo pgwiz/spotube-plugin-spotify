@@ -1,11 +1,29 @@
 # Changelog
 
-## [Unreleased]
+## 1.1.0
+
+### Highlights
+- **Requires Spotube with plugin API 0.1.0.** Spotube now only lets a plugin read WebView cookies for domains it declares. This version declares `spotify.com`, the only domain whose cookies it reads at login, and Spotube shows it when installing or updating the plugin.
+
+### Features
+- Declare `cookieDomains` for the WebView login, target plugin API 0.1.0, and update `spotube-gradle` to 0.2.0 (`95bd4de`).
 
 ### Fixes
 - **loader**: Implement platform `ResourceLoader` on Android (`classLoader.getResourceAsStream`) and iOS (`NSBundle.mainBundle.pathForResource`), resolving 40 unit test failures in `:spotify_gql_client:testAndroidHostTest`.
 - **spotify_gql_client & spotube_plugin_spotify**: Add keyless Spotify embed fallback parsing `https://open.spotify.com/embed/track/{id}` (`<script id="__NEXT_DATA__">`) extracting track title, artists, duration, thumbnails, and direct preview audio URL (`p.scdn.co`) when GQL `getTrack` returns null, 401, or 429.
 - **build**: Increase Gradle wrapper network timeout to 600,000ms (10m) to prevent socket read timeouts on large distribution downloads.
+- Tolerate unknown home section types in `HomeSectionDataUnion` so the home feed no longer fails on new Spotify section types (#82) (`e946116`).
+
+### Chore
+- Bump plugin version to 1.1.0.
+
+## 1.0.1
+
+### Fixes
+- Tolerate unknown home section types in `HomeSectionDataUnion` so the home feed no longer fails on new Spotify section types (#82) (`e946116`).
+
+### Chore
+- Bump plugin version to 1.0.1 (`2ed9349`).
 
 ## 1.0.0
 
@@ -27,7 +45,3 @@
 - Correct an invalid nuances URL (`db2b697`).
 - Fix the user profile not being fetched (`c391199`).
 - Fix tracks of albums, artists and playlists not loading (`a8ccb0e`).
-- Fix an audiobooks bug (#32) (`31f7bbd`).
-
-### CI / Release
-- The release workflow uses the `continuous` tag instead of `nightly` (`888cec6`).

@@ -22,6 +22,7 @@ import platform.Foundation.NSString
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.stringWithContentsOfFile
 
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class ResourceLoader actual constructor() {
     actual fun readText(path: String): String {
